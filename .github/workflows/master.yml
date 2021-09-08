@@ -19,7 +19,9 @@ jobs:
         dotnet tool install --global dotnet-deb
         dotnet deb install
     - name: Restore dependencies
-      run: dotnet restore
+      run: |
+        cd src
+        dotnet restore
     - name: Build
       run: dotnet build --no-restore
     - name: build and make deb
