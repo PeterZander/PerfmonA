@@ -1,0 +1,10 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=PerfmonA
+Comment=Medium term performance monitoring
+Exec=/usr/local/bin/PerfmonA
+Icon=/usr/share/icons/PerfmonA.png
+Terminal=false
+Type=Application
+StartupNotify=true
+Categories=System;
