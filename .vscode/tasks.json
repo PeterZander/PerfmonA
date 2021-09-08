@@ -7,7 +7,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/PerfmonA.sln",
+                "${workspaceFolder}/src/PerfmonA.sln",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -19,7 +19,10 @@
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/PerfmonA.sln",
+                "${workspaceFolder}/src/PerfmonA.sln",
+                "/p:Version=%1",
+                "-c Release",
+                "--self-contained true",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -32,7 +35,7 @@
             "args": [
                 "watch",
                 "run",
-                "${workspaceFolder}/PerfmonA.sln",
+                "${workspaceFolder}/src/PerfmonA.sln",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],

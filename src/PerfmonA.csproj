@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net5.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <Version>0.0.1</Version>
+  </PropertyGroup>
+  <ItemGroup>
+    <Folder Include="Models\" />
+    <AvaloniaResource Include="Assets\**" />
+    <Compile Update="**\*.xaml.cs">
+      <DependentUpon>%(Filename)</DependentUpon>
+    </Compile>
+    <AvaloniaResource Include="**\*.xaml">
+      <SubType>Designer</SubType>
+    </AvaloniaResource>
+  </ItemGroup>
+  <ItemGroup>
+    <LinuxFolder Include="/usr/share/applications" RemoveOnUninstall="false" />
+    <LinuxFolder Include="/usr/share/icons" RemoveOnUninstall="false" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="publish/PerfmonA.png" CopyToPublishDirectory="PreserveNewest">
+      <LinuxPath>/usr/share/icons/PerfmonA.png</LinuxPath>
+    </Content>
+    <Content Include="publish/PerfmonA.desktop" CopyToPublishDirectory="PreserveNewest">
+      <LinuxPath>/usr/share/applications/PerfmonA.desktop</LinuxPath>
+    </Content>
+  </ItemGroup>
+  <PropertyGroup>
+    <PostInstallScript>
+    </PostInstallScript>
+    <PostRemoveScript>
+    </PostRemoveScript>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="0.10.7" />
+    <PackageReference Include="Avalonia.Desktop" Version="0.10.7" />
+    <PackageReference Include="Avalonia.Diagnostics" Version="0.10.7" />
+    <PackageReference Include="Avalonia.ReactiveUI" Version="0.10.7" />
+    <PackageReference Include="Packaging.Targets" Version="$(PackagingNuGetVersion)" />
+  </ItemGroup>
+  <Target Name="PackageDebian" DependsOnTargets="CreateDeb" Outputs="$(DebPath)"/>
+</Project>

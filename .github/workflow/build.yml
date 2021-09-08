@@ -1,0 +1,27 @@
+name: Ubuntu Build
+
+on: [push, pull_request]
+
+jobs:
+  build-make:
+    name: Make deb
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.x
+    - name: setup DEB builder
+      run: |
+        dotnet tool install --global dotnet-deb
+        dotnet deb install
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet build --no-restore
+    - name: build and make deb
+      run: |
+        dotnet deb -c Release

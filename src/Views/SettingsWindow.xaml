@@ -1,0 +1,80 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:PerfmonA.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight="220"
+        x:Class="PerfmonA.Views.SettingsWindow"
+        Width="500" Height="200"
+        MinWidth="120" MinHeight="130"
+        Title="Settings">
+
+    <Design.DataContext>
+        <vm:SettingsWindowViewModel/>
+    </Design.DataContext>
+
+    <DockPanel>
+        <StackPanel DockPanel.Dock="Bottom" VerticalAlignment="Center" HorizontalAlignment="Right" Orientation="Horizontal" Margin="8">
+            <Button Padding="16 6" Margin="8" Command="{Binding OkCommand}">Ok</Button>
+            <Button Padding="16 6" Margin="8" Command="{Binding CancelCommand}">Cancel</Button>
+        </StackPanel>
+        <Grid ColumnDefinitions="10,Auto,*,10" RowDefinitions="Auto,Auto,Auto,Auto,Auto">
+            <TextBlock
+                Grid.Row="1" Grid.Column="1"
+                VerticalAlignment="Center" Margin="5"
+                Classes="label"
+                Text="Sampling interval:" />
+            <Border
+                Grid.Row="1" Grid.Column="2"
+                BorderThickness="0"
+                ToolTip.Tip="Time between samples">
+                <TextBox
+                    VerticalAlignment="Center"
+                    Text="{Binding SamplingRate}" />
+            </Border>
+
+            <TextBlock
+                Grid.Row="2" Grid.Column="1"
+                VerticalAlignment="Center" Margin="5"
+                Classes="label"
+                Text="Presentation interval:" />
+            <Border
+                Grid.Row="2" Grid.Column="2"
+                BorderThickness="0"
+                ToolTip.Tip="Time between presentation bars">
+                <TextBox
+                    VerticalAlignment="Center"
+                    Text="{Binding PresentationRate}" />
+            </Border>
+
+            <TextBlock
+                Grid.Row="3" Grid.Column="1"
+                VerticalAlignment="Center" Margin="5"
+                Classes="label"
+                Text="History length:" />
+            <Border
+                Grid.Row="3" Grid.Column="2"
+                BorderThickness="0"
+                ToolTip.Tip="Number of intervals preserved">
+                <TextBox
+                    VerticalAlignment="Center"
+                    Text="{Binding HistoryLength}" />
+            </Border>
+
+            <TextBlock
+                Grid.Row="4" Grid.Column="1"
+                VerticalAlignment="Center" Margin="5"
+                Classes="label"
+                Text="Network interface:" />
+            <Border
+                Grid.Row="4" Grid.Column="2"
+                BorderThickness="0"
+                ToolTip.Tip="Interface to monitor">
+                <ComboBox
+                    VerticalAlignment="Center"
+                    SelectedItem="{Binding NetworkInterface}"
+                    Items="{Binding NetworkInterfaces}" />
+            </Border>
+        </Grid>
+    </DockPanel>
+</Window>

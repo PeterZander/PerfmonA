@@ -1,0 +1,150 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:PerfmonA.ViewModels"
+        xmlns:v="using:PerfmonA.Views"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:pvr="using:PerfmonA"
+        xmlns:conv="using:PerfmonA.Converters"
+        xmlns:gr="using:Graph"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="PerfmonA.Views.MainWindow"
+        Icon="/Assets/PerfmonA.ico"
+        Title="PerfmonA">
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+    <Window.Styles>
+        <Style Selector="Button">
+            <Setter Property="Opacity" Value="0.3" />
+        </Style>
+        <Style Selector="Button:pointerover">
+            <Setter Property="Opacity" Value="1.0" />
+        </Style>
+    </Window.Styles>
+
+    <Window.Resources>
+        <conv:ControlWidthSubdividerConverter x:Key="WidthConverter"/>
+        <conv:ControlHeightSubdividerConverter x:Key="HeightConverter"/>
+    </Window.Resources>
+    
+    <Grid>
+        <Grid   Grid.Row="0" Grid.Column="0"
+                IsVisible="{Binding CPUVisible}"
+                ColumnDefinitions="*,50">
+            <ItemsRepeater
+                Grid.Row="0" Grid.Column="0"
+                x:Name="CpusRepeater" Items="{Binding CPUs}">
+                <ItemsRepeater.Layout>
+                    <UniformGridLayout ItemsJustification="Start" />
+                </ItemsRepeater.Layout>
+                <ItemsRepeater.ItemTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.MinWidth>
+                                <MultiBinding Converter="{StaticResource WidthConverter}">
+                                    <Binding Path="#CpusRepeater.Bounds.Width" />
+                                    <Binding Path="#CpusRepeater.Items.Count" />
+                                </MultiBinding>
+                            </Grid.MinWidth>
+                            <Grid.MinHeight>
+                                <MultiBinding Converter="{StaticResource HeightConverter}">
+                                    <Binding Path="#CpusRepeater.Bounds.Height" />
+                                    <Binding Path="#CpusRepeater.Items.Count" />
+                                </MultiBinding>
+                            </Grid.MinHeight>
+                            <Border Grid.Row="0" Grid.Column="0"
+                                BorderBrush="#333"
+                                BorderThickness="1" CornerRadius="3" />
+                            <TextBlock FontSize="28"
+                                Foreground="DarkCyan" 
+                                VerticalAlignment="Center" HorizontalAlignment="Center" 
+                                Text="{Binding LastValue}" />
+                            <TextBlock FontSize="12" FontWeight="Bold" 
+                                Foreground="Gray" 
+                                VerticalAlignment="Top" HorizontalAlignment="Center" 
+                                Text="{Binding Suffix}" />
+                            <gr:Graph Grid.Row="0" Grid.Column="0"
+                                Margin="10,10"
+                                ClipToBounds="false"
+                                Scales="{Binding Scale}">
+                            </gr:Graph>
+                        </Grid>
+                    </DataTemplate>
+                </ItemsRepeater.ItemTemplate>
+            </ItemsRepeater>
+            <Grid
+                Grid.Column="1"
+                ColumnDefinitions="10,*,10" RowDefinitions="20,*,5,30,5">
+                <ProgressBar
+                    Grid.Column="1" Grid.Row="1"
+                    Orientation="Vertical"
+                    VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                    Minimum="0" Maximum="1" Value="{Binding AllCpusLoad}" />
+                <TextBlock
+                    Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="3"
+                    VerticalAlignment="Top" HorizontalAlignment="Center"
+                    Foreground="#ddd"
+                    FontSize="12"
+                    Text="{Binding AllCpusLoadText}" />
+            </Grid>
+        </Grid>
+        <Grid   Grid.Row="0" Grid.Column="0"
+                IsVisible="{Binding CPUHistoryVisible}"
+                ColumnDefinitions="*,50">
+            <gr:Graph Grid.Row="0" Grid.Column="0"  Scales="{Binding AllCpusScale}" />
+        </Grid>
+        <Grid   Grid.Row="0" Grid.Column="0"
+                IsVisible="{Binding NetworkHistoryVisible}"
+                ColumnDefinitions="*,50">
+            <TextBlock FontSize="28" FontWeight="Bold"
+                Foreground="#444"
+                VerticalAlignment="Center" HorizontalAlignment="Center" 
+                Text="{Binding NetworkInterface}" />
+            <gr:Graph Grid.Row="0" Grid.Column="0" Scales="{Binding NetScale}" />
+        </Grid>
+        <StackPanel Grid.Row="0" Grid.Column="0"
+            Orientation="Horizontal"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Top"
+            Margin="20,20" >
+            <Button
+                Command="{Binding ShowCPU}"
+                ToolTip.Tip="F1"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center" >
+                CPUs
+            </Button>
+            <Button
+                Command="{Binding ShowCPUHistory}"
+                ToolTip.Tip="F2"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center" >
+                CPU History
+            </Button>
+            <Button
+                Command="{Binding ShowNetworkHistory}"
+                ToolTip.Tip="F3"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center" >
+                Network
+            </Button>
+            <Button
+                Command="{Binding ToggleFullscreen}"
+                ToolTip.Tip="F11"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center" >
+                Fullscreen
+            </Button>
+            <Button
+                Command="{Binding ShowSettings}"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                IsEnabled="{Binding SettingsEnabled}" >
+                Settings
+            </Button>
+        </StackPanel>
+    </Grid>
+</Window>

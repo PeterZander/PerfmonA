@@ -24,12 +24,34 @@ namespace PerfmonA.Views
         {
             base.OnKeyDown(e);
 
+            var vm = (ViewModels.MainWindowViewModel)DataContext!;
+
             switch ( e.Key )
             {
-                case Key.F:
-                case Key.F3:
-                    WindowState = WindowState == WindowState.FullScreen ? WindowState.Normal : WindowState.FullScreen;
+                case Key.F1:
+                    vm.ShowCPUPage();
                     break;
+
+                case Key.F2:
+                    vm.ShowCPUHistoryPage();
+                    break;
+
+                case Key.F3:
+                    vm.ShowNetworkHistoryPage();
+                    break;
+
+                case Key.F:
+                case Key.F11:
+                    vm.DoToggleFullscreen();
+                    break;
+            }
+        }
+
+        public void ForceLayoutPass()
+        {
+            if ( VisualRoot is TopLevel toplevel )
+            {
+                toplevel.LayoutManager.ExecuteLayoutPass();
             }
         }
     }
