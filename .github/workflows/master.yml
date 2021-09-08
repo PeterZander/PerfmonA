@@ -33,4 +33,5 @@ jobs:
     - name: Upload .deb Build Artifact
       uses: actions/upload-artifact@v2
       with:
-        path: /home/runner/work/PerfmonA/PerfmonA/src/bin/Release/net5.0/PerfmonA.0.0.1.deb
+        name: PerfmonA-latest
+        path: /home/runner/work/PerfmonA/PerfmonA/src/bin/Release/net5.0/PerfmonA*.deb
