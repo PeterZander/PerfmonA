@@ -30,7 +30,6 @@ namespace PerfmonA
     public class GraphHistorySeries: GraphSeries
     {
         public override string Title { get; set; }
-        public TimeSpan Window { get; set; } = TimeSpan.FromSeconds( 30 );
         
         DateTime LastUpdate = DateTime.Now;
 
@@ -59,7 +58,7 @@ namespace PerfmonA
         {
             var dval = Convert.ToDouble( val );
 
-            if ( Intervals.Count < 1 || DateTime.Now - LastUpdate > Window )
+            if ( Intervals.Count < 1 || DateTime.Now - LastUpdate > PerfMonContext.PresentationRate )
             {
                 while ( Intervals.Count > PerfMonContext.HistoryLength )
                 {
