@@ -32,6 +32,6 @@ jobs:
         dotnet deb -c Release
     - name: Upload .deb Build Artifact
       uses: actions/upload-artifact@v2
-        with:
-          name: WebApp1
-          path: /home/runner/work/PerfmonA/PerfmonA/src/bin/Release/net5.0/PerfmonA.0.0.1.deb
+      with:
+        name: WebApp1
+        path: /home/runner/work/PerfmonA/PerfmonA/src/bin/Release/net5.0/PerfmonA.0.0.1.deb
