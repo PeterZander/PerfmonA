@@ -15,7 +15,6 @@
     <Design.DataContext>
         <vm:MainWindowViewModel/>
     </Design.DataContext>
-
     <Window.Styles>
         <Style Selector="Button">
             <Setter Property="Opacity" Value="0.3" />
@@ -93,12 +92,12 @@
         </Grid>
         <Grid   Grid.Row="0" Grid.Column="0"
                 IsVisible="{Binding CPUHistoryVisible}"
-                ColumnDefinitions="*,50">
+                ColumnDefinitions="*">
             <gr:Graph Grid.Row="0" Grid.Column="0"  Scales="{Binding AllCpusScale}" />
         </Grid>
         <Grid   Grid.Row="0" Grid.Column="0"
                 IsVisible="{Binding NetworkHistoryVisible}"
-                ColumnDefinitions="*,50">
+                ColumnDefinitions="*">
             <TextBlock FontSize="28" FontWeight="Bold"
                 Foreground="#444"
                 VerticalAlignment="Center" HorizontalAlignment="Center" 
