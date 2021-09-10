@@ -68,7 +68,7 @@
                             <gr:Graph Grid.Row="0" Grid.Column="0"
                                 Margin="10,10"
                                 ClipToBounds="false"
-                                Scales="{Binding Scale}">
+                                Scales="{Binding Scales}">
                             </gr:Graph>
                         </Grid>
                     </DataTemplate>
@@ -93,7 +93,7 @@
         <Grid   Grid.Row="0" Grid.Column="0"
                 IsVisible="{Binding CPUHistoryVisible}"
                 ColumnDefinitions="*">
-            <gr:Graph Grid.Row="0" Grid.Column="0"  Scales="{Binding AllCpusScale}" />
+            <gr:Graph Grid.Row="0" Grid.Column="0"  Scales="{Binding AllCpus.Scales}" />
         </Grid>
         <Grid   Grid.Row="0" Grid.Column="0"
                 IsVisible="{Binding NetworkHistoryVisible}"
@@ -102,7 +102,7 @@
                 Foreground="#444"
                 VerticalAlignment="Center" HorizontalAlignment="Center" 
                 Text="{Binding NetworkInterface}" />
-            <gr:Graph Grid.Row="0" Grid.Column="0" Scales="{Binding NetScale}" />
+            <gr:Graph Grid.Row="0" Grid.Column="0" Scales="{Binding NetScales}" />
         </Grid>
         <StackPanel Grid.Row="0" Grid.Column="0"
             Orientation="Horizontal"

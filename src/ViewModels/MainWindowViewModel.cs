@@ -15,11 +15,14 @@ namespace PerfmonA.ViewModels
 {
     public class IndividualCpu: ReactiveObject
     {
-        public ObservableCollection<GraphScale> Scale { get; set; } = new ObservableCollection<GraphScale>();
+        ObservableCollection<GraphScale> ScalesField = new ObservableCollection<GraphScale>();
+        public ObservableCollection<GraphScale> Scales { get => ScalesField; set => this.RaiseAndSetIfChanged( ref ScalesField, value ); }
 
         public GraphHistorySeries CpuHistory = new GraphHistorySeries( "Total CPU" );
         public GraphHistorySeries CpuSystemHistory = new GraphHistorySeries( "System CPU" );
-        public PerfMonValue? LastValue { get; set; }
+        
+        public PerfMonValue? LastValueField;
+        public PerfMonValue? LastValue { get => LastValueField; set => this.RaiseAndSetIfChanged( ref LastValueField, value ); }
 
         public string Suffix { get; set; }
 
@@ -51,7 +54,7 @@ namespace PerfmonA.ViewModels
             scale.Add( CpuSystemHistory );
             scale.Add( CpuHistory );
 
-            Scale.Add( scale );
+            Scales.Add( scale );
         }
 
         public void Update( IPerfMonMetric s, DateTime time )
@@ -63,11 +66,7 @@ namespace PerfmonA.ViewModels
             CpuHistory.Add( LastValue, time );
             CpuSystemHistory.Add( s.Values[$"CPUUseSystem{Suffix}"], time );
 
-            Scale[0].Series[0] = CpuSystemHistory;
-            Scale[0].Series[1] = CpuHistory;
-
-            this.RaisePropertyChanged( "LastValue" );
-            this.RaisePropertyChanged( "Scale" );
+            this.RaisePropertyChanged( "Scales" );
         }
     }
 
@@ -79,14 +78,26 @@ namespace PerfmonA.ViewModels
         GraphHistorySeries TxHistory = new GraphHistorySeries( "Network transmit" );
         GraphHistorySeries RxHistory = new GraphHistorySeries( "Network receive" );
         
-        IndividualCpu AllCpus = new IndividualCpu( "" );
+        public IndividualCpu AllCpus { get; } = new IndividualCpu( "" );
 
-        public ObservableCollection<GraphScale> AllCpusScale { get => AllCpus.Scale; }
-        public double AllCpusLoad { get; set; }
-        public string AllCpusLoadText { get; set; } = "";
-        public ObservableCollection<GraphScale> NetScale { get; set; } = new ObservableCollection<GraphScale>();
+        double AllCpusLoadField;
+        public double AllCpusLoad { get => AllCpusLoadField; set => this.RaiseAndSetIfChanged( ref AllCpusLoadField, value ); }
+
+        string AllCpusLoadTextField = "";
+        public string AllCpusLoadText { get => AllCpusLoadTextField; set => this.RaiseAndSetIfChanged( ref AllCpusLoadTextField, value ); }
+
+        public ObservableCollection<GraphScale> NetScales { get; set; } = new ObservableCollection<GraphScale>();
 
         public ObservableCollection<IndividualCpu> CPUs { get; set; } = new ObservableCollection<IndividualCpu>();
+
+        public string NetworkInterface {
+            get => PerfMonContext.NetworkInterface;
+            set
+            {
+                PerfMonContext.NetworkInterface = value;
+                this.RaisePropertyChanged();
+            }
+        }
 
         readonly MainWindow MyWindow;
 
@@ -108,16 +119,6 @@ namespace PerfmonA.ViewModels
 
         public ReactiveCommand<Unit, Unit> ToggleFullscreen { get; }
         public ReactiveCommand<Unit, Unit> ShowSettings { get; }
-
-        public string NetworkInterface {
-            get => PerfMonContext.NetworkInterface;
-            set
-            {
-                PerfMonContext.NetworkInterface = value;
-                this.RaisePropertyChanged();
-            }
-        }
-
 #endregion
         
         public MainWindowViewModel( MainWindow window )
@@ -138,9 +139,9 @@ namespace PerfmonA.ViewModels
             AllCpus.CpuSystemHistory.MinMaxFill = Colors.DarkRed;
             AllCpus.CpuSystemHistory.MiddlePen = new Pen( Brushes.LightGoldenrodYellow, 2 );
             
-            NetScale.Add( new GraphRectangularLinearScale() );
-            NetScale[0].Add( TxHistory );
-            NetScale[0].Add( RxHistory );
+            NetScales.Add( new GraphRectangularLinearScale() );
+            NetScales[0].Add( TxHistory );
+            NetScales[0].Add( RxHistory );
 
             NetUsage!.Update += ( s, time ) => 
             {
@@ -161,12 +162,9 @@ namespace PerfmonA.ViewModels
                 val = s.Values[$"{PerfMonContext.NetworkInterface}.ReceiveBitsPerSecond"];
                 RxHistory.Add( val, time );
 
-                NetScale[0].Series[0] = TxHistory;
-                NetScale[0].Series[1] = RxHistory;
-
                 SettingsEnabled = true;
 
-                this.RaisePropertyChanged( "NetScale" );
+                this.RaisePropertyChanged( "NetScales" );
             };
 
             CpuSource!.Update += async ( s, time ) =>
@@ -175,13 +173,6 @@ namespace PerfmonA.ViewModels
                     return;
 
                 var cpucount = Convert.ToInt64( s.Values!["CPUCount"] );
-
-                AllCpus.Update( s, time );
-                var scpuuse = s.Values[$"CPUUse"];
-                AllCpusLoad = Convert.ToDouble( scpuuse );
-                AllCpusLoadText = scpuuse.ToString();
-                this.RaisePropertyChanged( "AllCpusLoad" );
-                this.RaisePropertyChanged( "AllCpusLoadText" );
 
                 if ( CPUs.Count < cpucount )
                 {
@@ -195,15 +186,17 @@ namespace PerfmonA.ViewModels
                     } );
                 }
 
+                var scpuuse = s.Values[$"CPUUse"];
+                AllCpusLoad = Convert.ToDouble( scpuuse );
+                AllCpusLoadText = scpuuse.ToString();
+
+                AllCpus.Update( s, time );
+
                 for ( int i = 0; i < cpucount; ++i )
                 {
                     var one = CPUs[i];
                     one.Update( s, time );
-                    one.RaisePropertyChanged( "Scale" );
                 }
-
-                this.RaisePropertyChanged( "AllCpusScale" );
-                this.RaisePropertyChanged( "CPUs" );
             };
         }
         public void ShowCPUPage()
@@ -214,7 +207,6 @@ namespace PerfmonA.ViewModels
             CPUVisible = true;
             CPUHistoryVisible = false;
             NetworkHistoryVisible = false;
-            MyWindow.ForceLayoutPass();
         }
 
         public void ShowCPUHistoryPage()

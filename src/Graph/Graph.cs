@@ -25,13 +25,18 @@ namespace Graph
             get { return ScalesField; }
             set
             {
-                SetAndRaise( ScalesProperty, ref ScalesField, value );
-                InvalidateVisual();
+                if ( !SetAndRaise( ScalesProperty, ref ScalesField, value ) )
+                {
+                    // Any change affects the entire surface
+                    RaisePropertyChanged( ScalesProperty, ScalesField, value );
+                }
             }
         }
 
-        public Graph()
+        static Graph()
         {
+            AffectsRender<Graph>(
+                ScalesProperty );
         }
 
         public void RenderLegend( DrawingContext dc, GraphScale[]? scar )
