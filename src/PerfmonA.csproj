@@ -39,6 +39,7 @@
     <PackageReference Include="Avalonia.Diagnostics" Version="0.10.7" />
     <PackageReference Include="Avalonia.ReactiveUI" Version="0.10.7" />
     <PackageReference Include="Packaging.Targets" Version="$(PackagingNuGetVersion)" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
   </ItemGroup>
   <Target Name="PackageDebian" DependsOnTargets="CreateDeb" Outputs="$(DebPath)"/>
 </Project>

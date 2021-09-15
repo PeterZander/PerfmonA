@@ -120,6 +120,8 @@ namespace PerfmonA.ViewModels
             PerfMonContext.NetworkInterface = NetworkInterface;
 
             MyWindow.Close();
+
+            Program.SaveConfiguration();
         }
 
         public ReactiveCommand<Unit, Unit> CancelCommand { get; }

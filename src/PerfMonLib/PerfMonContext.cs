@@ -6,12 +6,21 @@ using System.Reflection;
 
 namespace PerfMonLib
 {
+    public class PerfMonConfig
+    {
+        public TimeSpan SamplingRate { get; set; } = TimeSpan.FromSeconds( 5 );
+        public TimeSpan PresentationRate { get; set; } = TimeSpan.FromSeconds( 30 );
+        public int HistoryLength { get; set; } = 200;
+        public string NetworkInterface { get; set; } = "";
+    }
+
     public static class PerfMonContext
     {
-        public static TimeSpan SamplingRate { get; set; } = TimeSpan.FromSeconds( 5 );
-        public static TimeSpan PresentationRate { get; set; } = TimeSpan.FromSeconds( 30 );
-        public static int HistoryLength { get; set; } = 200;
-        public static string NetworkInterface { get; set; } = "";
+        public static PerfMonConfig Config = new PerfMonConfig();
+        public static TimeSpan SamplingRate { get => Config.SamplingRate; set => Config.SamplingRate = value; }
+        public static TimeSpan PresentationRate { get => Config.PresentationRate; set => Config.PresentationRate = value; }
+        public static int HistoryLength { get => Config.HistoryLength; set => Config.HistoryLength = value; }
+        public static string NetworkInterface { get => Config.NetworkInterface; set => Config.NetworkInterface = value; }
         
         static (string name, Type t)[] GetSources()
         {
