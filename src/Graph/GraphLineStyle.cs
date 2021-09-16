@@ -8,6 +8,31 @@ namespace Graph
 {
     public class GraphLineStyle: GraphStyle
     {
+        static readonly Point ZeroP = new Point( 0, 0 );
+        static readonly Point FiveYP = new Point( 0, 5 );
+
+        public static IEnumerable<IEnumerable<T>> Batch<T>( IEnumerable<T> source, int batchsize )
+        {
+            if ( batchsize <= 0 )
+                throw new ArgumentOutOfRangeException( "batchsize", "Must be greater than zero." );
+
+            using var enumerator = source.GetEnumerator();
+
+            while( enumerator.MoveNext() )
+            {
+                int i = 0;
+
+                IEnumerable<T> Batch()
+                {
+                    do yield return enumerator.Current;
+                    while( ++i < batchsize && enumerator.MoveNext() );
+                }
+
+                yield return Batch();
+                while( ++i < batchsize && enumerator.MoveNext() );
+            }
+        }
+
         public override void Render( DrawingContext dc, IEnumerable<GraphPosition> points, GraphSeries series, Rect dest )
         {
             if ( !series.Intervals.Any() )
@@ -24,58 +49,92 @@ namespace Graph
                     new Pen( new SolidColorBrush( series.MinMaxFill ), 0.3 ),
                     rangegeo );
 
-            var sg = new StreamGeometry();
-            using var sgc = sg.Open();
-
-            var tangents = new List<Point>();
+            var tangents = new List<(Point,Point)>();
             var pointsar = points.ToArray();
-            for( int i = 1; i < points.Count() - 1; ++i )
-            {
-                var p1 = new Point( pointsar[i - 1].X.Middle, pointsar[i - 1].Y.Middle );
-                var p2 = new Point( pointsar[i].X.Middle, pointsar[i].Y.Middle );
-                var p3 = new Point( pointsar[i + 1].X.Middle, pointsar[i + 1].Y.Middle );
+            var uselines = pointsar.Length > 500;
 
-                var newp = p2 - p1 + p3 - p2;
-                tangents.Add( newp * 0.15 );
+            if ( !uselines && pointsar.Length >= 3 )
+            {
+                var p1 = new Point( pointsar[0].X.Middle, pointsar[0].Y.Middle );
+                var p2 = new Point( pointsar[1].X.Middle, pointsar[1].Y.Middle );
+
+                for( int i = 1; i < points.Count() - 1; ++i )
+                {
+                    var rightp = pointsar[i + 1];
+                    var p3 = new Point( rightp.X.Middle, rightp.Y.Middle );
+
+                    var v1 = (Vector)( p2 - p1 );
+                    var v2 = (Vector)( p3 - p2 );
+                    Vector newv;
+
+                    if ( p2.Y < p1.Y && p2.Y < p3.Y
+                        || p2.Y > p1.Y && p2.Y > p3.Y )
+                    {
+                        newv = new Vector( 1.0, 0.0 );
+                    }
+                    else
+                    {
+                        newv = ( v1 + v2 ).Normalize();
+                    }
+
+                    var tscalef = 0.5 * v1.X;
+                    var newp = (Point) newv * tscalef;
+
+                    tangents.Add( ( -newp, newp ) );
+
+                    p1 = p2;
+                    p2 = p3;
+                }
             }
 
-            Point prevp = new Point( points.First().X.Middle, points.First().Y.Middle );
-            sgc.BeginFigure( prevp, false );
+            Point prevp = new Point( pointsar.First().X.Middle, pointsar.First().Y.Middle );
 
+            var pointsbatch = Batch( pointsar.Skip( 1 ), 150 );
+            
             var tangentix = 0;
-            var prevtangent = new Point( 0, 0 );
-            var isfirst = true;
+            var prevtangent = ZeroP;
 
-            foreach( var p in points.Skip( 1 ) )
+            foreach( var pb in pointsbatch )
             {
-                //sgc.LineTo( p.Middle );
-
-                var newp = new Point( p.X.Middle, p.Y.Middle );
-                var tangent = tangentix < tangents.Count ? tangents[tangentix] : new Point( 0, 0 );
-
-                if ( isfirst )
+                var sg = new StreamGeometry();
+                using ( var sgc = sg.Open() )
                 {
-                    var newt = newp - prevp;
-                    newt = ( newt / ( new Vector( newt.X, newt.Y ) ).Length ) * ( new Vector( tangent.X, tangent.Y ) ).Length * 0.3;
-                    prevtangent = newt;
-                    isfirst = false;
+                    sgc.BeginFigure( prevp, false );
+
+                    foreach( var p in pb )
+                    {
+                        var newp = new Point( p.X.Middle, p.Y.Middle );
+
+                        if ( uselines )
+                        {
+                            sgc.LineTo( newp );
+                        }
+                        else
+                        {
+                            var tangent = tangentix < tangents.Count ? tangents[tangentix] : ( ZeroP, ZeroP );
+                            sgc.CubicBezierTo( prevp + prevtangent, newp + tangent.Item1, newp );
+
+                            // Tangent
+                            /*
+                            dc.DrawLine( new Pen( Brushes.Khaki, 1 ), prevp, prevp + prevtangent * 3 );
+                            dc.DrawLine( new Pen( Brushes.Violet, 1 ), newp, newp + tangent.Item1 * 3 );
+                            dc.DrawLine( new Pen( Brushes.Gray, 1 ), newp - FiveYP, newp + FiveYP );
+                            */
+
+                            prevtangent = tangent.Item2;
+                            ++tangentix;
+                        }
+
+                        prevp = newp;
+                    }
+                    sgc.EndFigure( false );
                 }
 
-                sgc.CubicBezierTo( prevp + prevtangent, newp - tangent, newp );
-
-                // Tangent
-                //dc.DrawLine( new Pen( Brushes.Violet, 2 ), newp, newp + tangent * 3 );
-
-                prevp = newp;
-                prevtangent = tangent;
-                ++tangentix;
+                dc.DrawGeometry(
+                        Brushes.Transparent,
+                        series.MiddlePen,
+                        sg );
             }
-            sgc.EndFigure( false );
-
-            dc.DrawGeometry(
-                    Brushes.Transparent,
-                    series.MiddlePen,
-                    sg );
 
 
             if ( series.Intervals.Count > 0 ) 
