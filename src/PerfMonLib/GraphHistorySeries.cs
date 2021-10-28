@@ -33,7 +33,7 @@ namespace PerfmonA
         
         DateTime LastUpdate = DateTime.Now;
 
-        public GraphSeriesAveraging MiddleAveragingMessure = new GraphSeriesEMAAveraging( 4 );
+        public GraphSeriesAveraging MiddleAveragingMessure = new GraphSeriesAdaptiveEMAAveraging();
 
         public GraphHistorySeries( string title )
         {
