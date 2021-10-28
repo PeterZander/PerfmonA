@@ -162,9 +162,12 @@ namespace PerfmonA.ViewModels
                 val = s.Values[$"{PerfMonContext.NetworkInterface}.ReceiveBitsPerSecond"];
                 RxHistory.Add( val, time );
 
-                SettingsEnabled = true;
+                UpdateUI( () =>
+                {
+                    SettingsEnabled = true;
 
-                this.RaisePropertyChanged( "NetScales" );
+                    this.RaisePropertyChanged( "NetScales" );
+                } );
             };
 
             CpuSource!.Update += async ( s, time ) =>
@@ -190,44 +193,96 @@ namespace PerfmonA.ViewModels
                 AllCpusLoad = Convert.ToDouble( scpuuse );
                 AllCpusLoadText = scpuuse.ToString();
 
-                AllCpus.Update( s, time );
-
-                for ( int i = 0; i < cpucount; ++i )
+                UpdateUI( () => 
                 {
-                    var one = CPUs[i];
-                    one.Update( s, time );
-                }
+                    AllCpus.Update( s, time );
+
+                    for ( int i = 0; i < cpucount; ++i )
+                    {
+                        var one = CPUs[i];
+                        one.Update( s, time );
+                    }
+                } );
             };
         }
+
+        object UpdateUILock = new object();
+
+        void UpdateUI( Action action )
+        {
+            lock ( UpdateUILock )
+            {
+                try
+                {
+                    if ( Avalonia.Threading.Dispatcher.UIThread.CheckAccess() )
+                    {
+                        action?.Invoke();
+                    }
+                    else
+                    {
+                        var t = Avalonia.Threading.Dispatcher.UIThread.InvokeAsync( () =>
+                        {
+                            try
+                            {
+                                action?.Invoke();
+                            }
+                            catch( Exception ex )
+                            {
+                                System.Diagnostics.Debug.WriteLine( ex.ToString() );
+                            }
+                        } );
+
+                        t.ConfigureAwait( false );
+                    }
+                }
+                catch( Exception ex )
+                {
+                    System.Diagnostics.Debug.WriteLine( ex.ToString() );
+                }
+            }
+        }
+
         public void ShowCPUPage()
         {
             if ( CPUVisible )
                 return;
                 
-            CPUVisible = true;
-            CPUHistoryVisible = false;
-            NetworkHistoryVisible = false;
+            UpdateUI( () =>
+            {
+                CPUHistoryVisible = false;
+                NetworkHistoryVisible = false;
+                CPUVisible = true;
+            } );
         }
 
         public void ShowCPUHistoryPage()
         {
-            CPUHistoryVisible = true;
-            CPUVisible = false;
-            NetworkHistoryVisible = false;
+            UpdateUI( () =>
+            {
+                CPUVisible = false;
+                NetworkHistoryVisible = false;
+                CPUHistoryVisible = true;
+            } );
         }
 
         public void ShowNetworkHistoryPage()
         {
-            NetworkHistoryVisible = true;
-            CPUVisible = false;
-            CPUHistoryVisible = false;
+            UpdateUI( () =>
+            {
+                CPUVisible = false;
+                CPUHistoryVisible = false;
+                NetworkHistoryVisible = true;
+            } );
         }
 
         public void DoToggleFullscreen()
         {
-            MyWindow.WindowState = MyWindow.WindowState == WindowState.FullScreen
+            UpdateUI( () =>
+            {
+                MyWindow.WindowState = MyWindow.WindowState == WindowState.FullScreen
                                 ? WindowState.Normal
                                 : WindowState.FullScreen;
+            } );
         }
 
         public async Task DoShowSettings()
@@ -235,7 +290,7 @@ namespace PerfmonA.ViewModels
             var sw = new Views.SettingsWindow();
             sw.DataContext = new SettingsWindowViewModel( sw, NetUsage! );
             await sw.ShowDialog( MyWindow );
-            this.RaisePropertyChanged( "NetworkInterface" );
+            UpdateUI( () => this.RaisePropertyChanged( "NetworkInterface" ) );
         }
     }
 }

@@ -4,6 +4,7 @@ using System;
 using System.Linq;
 using Avalonia.Media;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 
 namespace Graph
 {
@@ -112,18 +113,25 @@ namespace Graph
             if ( ScalesField == null || !ScalesField.Any() )
                 return;
                 
-            var scar = ScalesField.ToArray();
-
-            if ( IsLegendVisible ) RenderLegend( dc, scar );
-
-            var b = new Rect( Bounds.Size );
-
-            // Render surface
-            XAxis.Render( dc, scar, b );
-
-            foreach( var s in scar )
+            try
             {
-                s.Render( dc, XAxis, b );
+                var scar = ScalesField.ToArray();
+
+                if ( IsLegendVisible ) RenderLegend( dc, scar );
+
+                var b = new Rect( Bounds.Size );
+
+                // Render surface
+                XAxis.Render( dc, scar, b );
+
+                foreach( var s in scar )
+                {
+                    s.Render( dc, XAxis, b );
+                }
+            }
+            catch( Exception ex )
+            {
+                Debug.WriteLine( ex.ToString() );
             }
         }
     }

@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Linq;
+using System.Diagnostics;
 
 namespace PerfMonLib
 {
@@ -22,7 +23,14 @@ namespace PerfMonLib
                 while ( !ct.IsCancellationRequested )
                 {
                     await Task.Delay( PerfMonContext.SamplingRate );
-                    await Poll( ct );
+                    try
+                    {
+                        await Poll( ct );
+                    }
+                    catch( Exception ex )
+                    {
+                        Debug.WriteLine( ex.ToString() );
+                    }
                 }
             } );
         }

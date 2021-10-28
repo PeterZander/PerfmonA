@@ -2,6 +2,7 @@
 using System.IO;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Rendering;
 using Avalonia.ReactiveUI;
 using PerfMonLib;
 using Newtonsoft.Json;
@@ -21,7 +22,7 @@ namespace PerfmonA
             ReadConfiguration();
 
             BuildAvaloniaApp()
-                .StartWithClassicDesktopLifetime(args);
+                .StartWithClassicDesktopLifetime( args );
         }
 
         // Avalonia configuration, don't remove; also used by visual designer.
