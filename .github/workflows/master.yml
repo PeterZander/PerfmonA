@@ -29,7 +29,7 @@ jobs:
     - name: build and make deb
       run: |
         cd src
-        dotnet deb -c Release
+        dotnet deb -c Release -r linux-x64
     - name: Upload .deb Build Artifact
       uses: actions/upload-artifact@v2
       with:
