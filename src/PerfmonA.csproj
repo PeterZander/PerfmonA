@@ -3,6 +3,7 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
     <Nullable>enable</Nullable>
+    <Version>0.0.3</Version>
     <RuntimeIdentifiers>linux-x64</RuntimeIdentifiers>
     <SelfContained>True</SelfContained>
   </PropertyGroup>
