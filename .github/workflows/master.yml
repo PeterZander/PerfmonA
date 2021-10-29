@@ -18,14 +18,10 @@ jobs:
       run: |
         dotnet tool install --global dotnet-deb
         dotnet deb install
-    - name: Restore dependencies
-      run: |
-        cd src
-        dotnet restore
     - name: Build
       run: |
         cd src
-        dotnet build --no-restore
+        dotnet publish PerfmonA.sln -c Release -r linux-x64
     - name: build and make deb
       run: |
         cd src
